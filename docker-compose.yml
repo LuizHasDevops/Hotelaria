@@ -1,0 +1,60 @@
+networks:
+  hotel-internal:
+    driver: bridge
+  hotel-external:
+    driver: bridge
+
+services:
+
+  eureka:
+    build:
+      context: ./eureka
+      dockerfile: dockerFile
+    container_name: eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - hotel-internal
+
+  reserva:
+    build:
+      context: ./reserva
+      dockerfile: docker/dockerFile
+    container_name: reserva
+    depends_on:
+      - eureka
+    networks:
+      - hotel-internal
+
+  notificacao:
+    build:
+      context: ./notificacao
+      dockerfile: dockerFile
+    container_name: notificacao
+    depends_on:
+      - eureka
+    networks:
+      - hotel-internal
+
+  disponibilidade:
+    build:
+      context: ./disponibilidade
+      dockerfile: dockerFile
+    container_name: disponibilidade
+    depends_on:
+      - eureka
+    networks:
+      - hotel-internal
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: dockerFile
+    container_name: gateway
+    ports:
+      - "8080:8080" # Porta pública de entrada
+    depends_on:
+      - eureka
+    networks:
+      - hotel-internal
+      - hotel-external
